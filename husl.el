@@ -22,3 +22,5 @@
     (* 116.0 (- (expt y (/ 1.0 3.0)) 16.0))))
 
 (husl/conv-xyz-luv 0.5 0.5 0.5)
+
+(provide 'husl)
