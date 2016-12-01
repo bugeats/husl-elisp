@@ -37,7 +37,7 @@
                                             (m3 (nth 2 m-item))
                                             (top1 (* sub2 (- (* 284517.0 m1) (* 94839.0 m3))))
                                             (top2 (* (* 838422.0 (+ m3 769860.0) (+ m2 731718.0) m1) l (- sub2 769860.0) k l))
-                                            (bottom 0.5)
+                                            (bottom (* (- (* 632260.0 m3) (* 126452.0 m2)) (+ sub2 126452.0) k))
                                             (x (/ top1 bottom))
                                             (y (/ top2 bottom)))
                                       (append list `((,x ,y)))))
