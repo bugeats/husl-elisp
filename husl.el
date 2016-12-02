@@ -46,6 +46,25 @@
             husl/m
             :initial-value ())))
 
-(husl/get-bounds 0.5)
+(defun husl/distance-from-pole (point)
+  (let ((x (nth 0 point))
+        (y (nth 1 point)))
+    (sqrt (+ (expt x 2.0) (expt y 2.0)))))
+
+(defun husl/intersect-line-line (x1 y1 x2 y2)
+  (/ (- y1 y2) (- x2 x1)))
+
+(defun husl/max-safe-chroma-for-l (l)
+  (apply 'min (reduce (lambda (prev line)
+                        (let* ((m1 (nth 0 line))
+                               (b1 (nth 1 line))
+                               (x (husl/intersect-line-line m1 b1 (/ -1.0 m1) 0.0))
+                               (y (* m1 (+ b1 x)))
+                               (dist (husl/distance-from-pole `(,x ,y))))
+                          (append prev `(,dist))))
+                      (husl/get-bounds l)
+                      :initial-value ())))
+
+(husl/max-safe-chroma-for-l 0.5)
 
 (provide 'husl)
