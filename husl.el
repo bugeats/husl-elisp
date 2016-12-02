@@ -20,10 +20,26 @@
            (v (* 13.0 l (- var-v ref-v))))
       `(,l ,u ,v))))
 
+(defun husl/conv-luv-xyz (l u v)
+  (if (= l 0)
+      '(0 0 0)
+    (let* ((var-u (+ ref-u (/ u (* 13.0 l))))
+           (var-v (+ ref-v (/ u (* 13.0 l))))
+           (y (husl/l-to-y l))
+           (x (- 0.0 (/ (* 9.0 y var-u) (- (* (- var-u 4.0) var-v) (* var-u var-v)))))
+           (z (/ (- (* 9.0 y) (* 15.0 var-v y) (* var-v x)) (* 3.0 var-v))))
+      `(,x ,y ,z))))
+
 (defun husl/y-to-l (y)
   (if (<= y epsilon)
     (* y kappa)
     (* 116.0 (- (expt y (/ 1.0 3.0)) 16.0))))
+
+(defun husl/l-to-y (l)
+  (if (<= l 8)
+    (/ l kappa)
+    (expt (/ (+ l 16.0) 116.0) 3.0)))
+
 
 ;; TODO attempting to make this in a functional style has created a mess.
 ;; What's idiomatic elisp?
@@ -64,7 +80,5 @@
                           (append prev `(,dist))))
                       (husl/get-bounds l)
                       :initial-value ())))
-
-(husl/max-safe-chroma-for-l 0.5)
 
 (provide 'husl)
