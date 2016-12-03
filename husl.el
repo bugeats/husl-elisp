@@ -1,17 +1,37 @@
 ;;; -*- lexical-binding: t -*-
 
-(defvar epsilon 0.0088564516790356308)
-(defvar kappa 903.2962962962963)
-(defvar ref-u 0.19783000664283681)
-(defvar ref-v 0.468319994938791)
+;; (defvar epsilon 0.0088564516790356308)
+;; (defvar kappa 903.2962962962963)
+;; (defvar ref-u 0.19783000664283681)
+;; (defvar ref-v 0.468319994938791)
 
 (defvar husl/m '((3.240969941904521 -1.537383177570093 -0.498610760293)
                  (-0.96924363628087 1.87596750150772   0.041555057407175)
                  (0.055630079696993 -0.20397695888897  1.056971514242878)))
 
+;; From Python Source
+;; (defvar epsilon 0.0088564516)
+;; (defvar kappa 903.2962962)
+;; (defvar ref-u 0.19783000664283)
+;; (defvar ref-v 0.46831999493879)
+
+;; From Haxe Ref
+(defvar epsilon 0.0088564516)
+(defvar kappa 903.2962962)
+(defvar ref-u 0.19783000664283)
+(defvar ref-v 0.46831999493879)
+
+;; return 116.0 * math.Pow(y, 1.0 / 3.0) - 16.0
+
+(defun husl/y-to-l (y)
+  (if (<= y epsilon)
+      (* y kappa)
+    (- (* 116.0 (expt y (/ 1.0 3.0))) 16.0)))
+
+;; HERE
 (defun husl/conv-xyz-luv (x y z)
-  (if (= x y z 0)
-      '(0 0 0)
+  (if (= x y z 0.0)
+      '(0.0 0.0 0.0)
     (let* (
            (l (husl/y-to-l y))
            (var-u (/ (* 4.0 x) (+ x (* 15.0 y) (* 3.0 z))))
@@ -29,11 +49,6 @@
            (x (- 0.0 (/ (* 9.0 y var-u) (- (* (- var-u 4.0) var-v) (* var-u var-v)))))
            (z (/ (- (* 9.0 y) (* 15.0 var-v y) (* var-v x)) (* 3.0 var-v))))
       `(,x ,y ,z))))
-
-(defun husl/y-to-l (y)
-  (if (<= y epsilon)
-    (* y kappa)
-    (* 116.0 (- (expt y (/ 1.0 3.0)) 16.0))))
 
 (defun husl/l-to-y (l)
   (if (<= l 8)
