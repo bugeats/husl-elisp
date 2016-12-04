@@ -4,6 +4,12 @@
 (ert-deftest addition-test ()
   (should (= (+ 1 2) 3)))
 
+(ert-deftest required-public-functions-exist ()
+  (should (fboundp 'husl/husl-to-rgb))
+  (should (fboundp 'husl/huslp-to-rgb))
+  (should (fboundp 'husl/rgb-to-husl))
+  (should (fboundp 'husl/rgb-to-huslp)))
+
 ;; (ert-deftest test-conv-xyz-luv ()
 ;;   (should (eql (husl/conv-xyz-luv
 ;;                 0.03146462160095975

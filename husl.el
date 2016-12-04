@@ -10,6 +10,34 @@
 (defvar ref-u 0.19783000664283)
 (defvar ref-v 0.46831999493879)
 
+;; Required Public Functions ---------------------------------------------------
+
+(defun husl/husl-to-rgb (h s l)
+  (let ((r 0)
+        (g 0)
+        (b 0))
+   `[,r ,g ,b]))
+
+(defun husl/rgb-to-husl (r g b)
+  (let ((h 0)
+        (s 0)
+        (l 0))
+    `[,h ,s ,l]))
+
+(defun husl/huslp-to-rgb (r g b)
+  (let ((r 0)
+        (g 0)
+        (b 0))
+    `[,r ,g ,b]))
+
+(defun husl/rgb-to-huslp (r g b)
+  (let ((h 0)
+        (s 0)
+        (l 0))
+    `[,h ,s ,l]))
+
+;; Public Functions ------------------------------------------------------------
+
 (defun husl/max-chroma-for-l-h (l h)
   (let ((h-rad (* (/ h 360) float-pi 2.0)))
     (apply 'min (mapcar (lambda (line)
