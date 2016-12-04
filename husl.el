@@ -120,26 +120,24 @@ http://en.wikipedia.org/wiki/CIELUV"
   (let* ((h-rad (* (/ h 360.0) 2.0 float-pi))
          (u (* c (cos h-rad)))
          (v (* c (sin h-rad))))
-    `[,l ,u ,v]))
+    (vector l u v)))
 
-(defun husl/conv-husl-lch (h s l)
+(defun husl/-husl-to-lch (h s l)
   (let ((c (if (or (> l 99.9999999) (< l 0.00000001))
                0.0
              (* s (/ (husl/-max-chroma-for-l-h l h)) 100))))
-    `(,l ,c ,h)))
+    (vector l c h)))
 
-(defun husl/conv-luv-lch (l u v)
+(defun husl/-luv-to-lch (l u v)
   (let* ((c (sqrt (+ (expt u 2) (expt v 2))))
          (h-rad (atan v u))
          (h-tmp (if (< c 0.00000001)
                     0.0
                   (/ (* h-rad 180.0) float-pi)))
          (h (if (< h-tmp 0) (+ 360 h-tmp) h-tmp)))
-    `(,l ,c, h)))
+    (vector l c h)))
 
-(husl/conv-luv-lch 0.5 0.5 0.5)
-
-(defun husl/conv-luv-xyz (l u v)
+(defun husl/-luv-to-xyz (l u v)
   (if (= l 0)
       '(0 0 0)
     (let* ((var-u (+ husl/-ref-u (/ u (* 13.0 l))))
@@ -149,20 +147,13 @@ http://en.wikipedia.org/wiki/CIELUV"
                         (- (* (- var-u 4.0) var-v) (* var-u var-v)))))
            (z (/ (- (* 9.0 y) (* 15.0 var-v y) (* var-v x))
                  (* 3.0 var-v))))
-      `(,x ,y ,z))))
+      (vector x y z))))
 
-(defun husl/conv-rgb-hex (r g b)
+(defun husl/-rgb-to-hex (r g b)
   (apply 'format "#%02x%02x%02x"
          (mapcar (lambda (x)
                    (* (max 0 (min x 1)) 255.0))
-                 `(,r ,g ,b))))
-
-
-(defun husl/conv-rgb-hex (r g b)
-  (let ((r-v (* (max 0 (min r 1)) 255.0))
-        (g-v (* (max 0 (min g 1)) 255.0))
-        (b-v (* (max 0 (min b 1)) 255.0)))
-    (format "#%02x%02x%02x" r-v g-v b-v)))
+                 (vector r g b))))
 
 (defun husl/conv-xyz-luv (x y z)
   (if (= x y z 0.0)
@@ -173,7 +164,7 @@ http://en.wikipedia.org/wiki/CIELUV"
            (var-v (/ (* 9.0 x) (+ x (* 15.0 y) (* 3.0 z))))
            (u (* 13.0 l (- var-u husl/-ref-u)))
            (v (* 13.0 l (- var-v husl/-ref-v))))
-      `(,l ,u ,v))))
+      (vector l u v))))
 
 
 ;; -----------------------------------------------------------------------------

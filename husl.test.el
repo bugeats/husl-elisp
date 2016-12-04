@@ -10,15 +10,15 @@
   (should (fboundp 'husl/rgb-to-husl))
   (should (fboundp 'husl/rgb-to-huslp)))
 
-(ert-deftest test-conv-luv-lch ()
-  (should (equal (husl/conv-luv-lch
+(ert-deftest test-luv-to-lch ()
+  (should (equal (husl/-luv-to-lch
                   66.4684397846863
                   -30.54979105634606
                   -35.56297143225253)
-                 '(
-                   66.4684397846863
-                   46.88298913974675
-                   229.3363102843981))))
+                 [
+                  66.4684397846863
+                  46.88298913974675
+                  229.3363102843981])))
 
 (ert-deftest test-get-bounds ()
   (should (equal (husl/-get-bounds 1)
@@ -45,7 +45,7 @@
 (ert-deftest test-l-to-y ()
   (should (equal (husl/-l-to-y 76.06926101415557) 0.5000000000000001)))
 
-;; TODO this has rounding errors
+;; ;; TODO this has rounding errors
 ;; (ert-deftest test-lch-to-luv ()
 ;;   (should (eql (husl/-lch-to-luv
 ;;                 66.4684397846863
