@@ -53,6 +53,23 @@
              (* s (/ (husl/max-chroma-for-l-h l h)) 100))))
     `(,l ,c ,h)))
 
+(defun husl/conv-lch-luv (l c h)
+  (let* ((h-rad (* (/ h 360.0) 2.0 float-pi))
+         (u (* c (cos h-rad)))
+         (v (* c (sin h-rad))))
+    `(,l ,u ,v)))
+
+(defun husl/conv-luv-lch (l u v)
+  (let* ((c (sqrt (+ (expt u 2) (expt v 2))))
+         (h-rad (atan v u))
+         (h-tmp (if (< c 0.00000001)
+                    0.0
+                  (/ (* h-rad 180.0) float-pi)))
+         (h (if (< h-tmp 0) (+ 360 h-tmp) h-tmp)))
+    `(,l ,c, h)))
+
+(husl/conv-luv-lch 0.5 0.5 0.5)
+
 (defun husl/conv-luv-xyz (l u v)
   (if (= l 0)
       '(0 0 0)
