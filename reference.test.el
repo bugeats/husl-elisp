@@ -29,7 +29,7 @@
            (ref-luv   (cdr (assoc 'luv (cdr element))))
            (ref-rgb   (force-floats (cdr (assoc 'rgb (cdr element)))))
            (ref-xyz   (cdr (assoc 'xyz (cdr element))))
-           (rgb (apply 'vector (husl/conv-hex-rgb ref-hex))))
+           (rgb (husl/-hex-to-rgb ref-hex)))
       (eval `(ert-deftest ,ref-key ()
                (should (eq-triple ,ref-rgb ,rgb))
                (should (eq-triple ,ref-rgb ,ref-rgb))

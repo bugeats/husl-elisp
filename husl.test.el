@@ -30,6 +30,12 @@
                   [1.1608500428554671e-08 -13211937493691.564]
                   [-1.0647676645116482e-09 -230466880832.473]])))
 
+(ert-deftest test-hex-to-rgb ()
+  (should (equal (husl/-hex-to-rgb "#DDEEFF")
+                 [0.8666666666666667 0.9333333333333333 1.0]))
+  (should (equal (husl/-hex-to-rgb "#010101")
+                 [0.00392156862745098 0.00392156862745098 0.00392156862745098])))
+
 ;; (ert-deftest test-conv-lch-luv ()
 ;;   (should (eql (husl/conv-lch-luv
 ;;                 66.4684397846863
