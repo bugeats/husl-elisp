@@ -63,6 +63,14 @@
                    (* (max 0 (min x 1)) 255.0))
                  `(,r ,g ,b))))
 
+(defun husl/conv-hex-rgb (hex)
+  (let* ((hex-c (replace-regexp-in-string "#" "" hex)))
+      (mapcar (lambda (nn)
+                (/ (float (string-to-number nn 16)) 255.0))
+              `(,(substring hex-c 0 2)
+                ,(substring hex-c 2 4)
+                ,(substring hex-c 4 6)))))
+
 (defun husl/conv-rgb-hex (r g b)
   (let ((r-v (* (max 0 (min r 1)) 255.0))
         (g-v (* (max 0 (min g 1)) 255.0))
@@ -89,7 +97,6 @@
 (defun husl/l-to-y (l)
   (if (<= l 8)
       (/ l kappa)
-    ;; return math.Pow((l + 16.0) / 116.0, 3.0)
     (expt (/ (+ l 16.0) 116.0) 3.0)))
 
 (defun husl/conv-luv-xyz (l u v)
