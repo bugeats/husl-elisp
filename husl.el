@@ -71,6 +71,20 @@ represent the bounds in CIELUV, stepping over which will push a value out of the
             husl/-m
             :initial-value [])))
 
+(defun husl/-max-safe-chroma-for-l (l)
+  "For given lightness, returns the maximum chroma. Keeping the chroma value \
+below this number will ensure that for any hue, the color is within the RGB gamut."
+  (apply 'min (reduce (lambda (prev line)
+                        (let* ((m1 (aref line 0))
+                               (b1 (aref line 1))
+                               (x (husl/intersect-line-line m1 b1 (/ -1.0 m1) 0.0))
+                               (y (* m1 (+ b1 x)))
+                               (dist (husl/distance-from-pole `(,x ,y))))
+                          (append prev `(,dist))))
+                      (husl/-get-bounds l)
+                      :initial-value ())))
+
+
 ;; Conversion Functions --------------------------------------------------------
 
 (defun husl/-hex-to-rgb (hex)
@@ -141,7 +155,7 @@ represent the bounds in CIELUV, stepping over which will push a value out of the
       `(,l ,u ,v))))
 
 
-;; Public Functions ------------------------------------------------------------
+;; -----------------------------------------------------------------------------
 
 (defun husl/max-chroma-for-l-h (l h)
   (let ((h-rad (* (/ h 360) float-pi 2.0)))
@@ -150,17 +164,6 @@ represent the bounds in CIELUV, stepping over which will push a value out of the
                                 (y (nth 1 line)))
                             (husl/length-of-ray-until-intersect h-rad x y)))
                         (husl/-get-bounds l)))))
-
-(defun husl/max-safe-chroma-for-l (l)
-  (apply 'min (reduce (lambda (prev line)
-                        (let* ((m1 (nth 0 line))
-                               (b1 (nth 1 line))
-                               (x (husl/intersect-line-line m1 b1 (/ -1.0 m1) 0.0))
-                               (y (* m1 (+ b1 x)))
-                               (dist (husl/distance-from-pole `(,x ,y))))
-                          (append prev `(,dist))))
-                      (husl/-get-bounds l)
-                      :initial-value ())))
 
 (defun husl/length-of-ray-until-intersect (theta x y)
   (/ y (- (sin theta) (* x (cos theta)))))

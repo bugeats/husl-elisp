@@ -36,6 +36,9 @@
   (should (equal (husl/-hex-to-rgb "#010101")
                  [0.00392156862745098 0.00392156862745098 0.00392156862745098])))
 
+(ert-deftest test-max-safe-chroma-for-l ()
+  (should (equal (husl/-max-safe-chroma-for-l 0.5) 43.379884652926776)))
+
 ;; (ert-deftest test-conv-lch-luv ()
 ;;   (should (eql (husl/conv-lch-luv
 ;;                 66.4684397846863
