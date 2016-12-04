@@ -15,6 +15,10 @@
        (equal (elt a 1) (elt b 1))
        (equal (elt a 2) (elt b 2))))
 
+(defun force-floats (arr)
+  (apply 'vector
+    (mapcar 'float arr)))
+
 (let (value)
   (dolist (element ref-data value)
     (let* ((ref-key   (car element))
@@ -23,7 +27,7 @@
            (ref-huslp (cdr (assoc 'huslp (cdr element))))
            (ref-lch   (cdr (assoc 'lch (cdr element))))
            (ref-luv   (cdr (assoc 'luv (cdr element))))
-           (ref-rgb   (cdr (assoc 'rgb (cdr element))))
+           (ref-rgb   (force-floats (cdr (assoc 'rgb (cdr element)))))
            (ref-xyz   (cdr (assoc 'xyz (cdr element))))
            (rgb (apply 'vector (husl/conv-hex-rgb ref-hex))))
       (eval `(ert-deftest ,ref-key ()
