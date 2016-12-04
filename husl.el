@@ -36,6 +36,60 @@
         (l 0))
     `[,h ,s ,l]))
 
+
+;; Conversion Functions --------------------------------------------------------
+
+(defun husl/conv-hex-rgb (hex)
+  (let* ((hex-c (replace-regexp-in-string "#" "" hex)))
+    (mapcar (lambda (nn)
+              (/ (float (string-to-number nn 16)) 255.0))
+            `(,(substring hex-c 0 2)
+              ,(substring hex-c 2 4)
+              ,(substring hex-c 4 6)))))
+
+(defun husl/conv-husl-lch (h s l)
+  (let ((c (if (or (> l 99.9999999) (< l 0.00000001))
+               0.0
+             (* s (/ (husl/max-chroma-for-l-h l h)) 100))))
+    `(,l ,c ,h)))
+
+(defun husl/conv-luv-xyz (l u v)
+  (if (= l 0)
+      '(0 0 0)
+    (let* ((var-u (+ ref-u (/ u (* 13.0 l))))
+           (var-v (+ ref-v (/ u (* 13.0 l))))
+           (y (husl/l-to-y l))
+           (x (- 0.0 (/ (* 9.0 y var-u)
+                        (- (* (- var-u 4.0) var-v) (* var-u var-v)))))
+           (z (/ (- (* 9.0 y) (* 15.0 var-v y) (* var-v x))
+                 (* 3.0 var-v))))
+      `(,x ,y ,z))))
+
+(defun husl/conv-rgb-hex (r g b)
+  (apply 'format "#%02x%02x%02x"
+         (mapcar (lambda (x)
+                   (* (max 0 (min x 1)) 255.0))
+                 `(,r ,g ,b))))
+
+
+(defun husl/conv-rgb-hex (r g b)
+  (let ((r-v (* (max 0 (min r 1)) 255.0))
+        (g-v (* (max 0 (min g 1)) 255.0))
+        (b-v (* (max 0 (min b 1)) 255.0)))
+    (format "#%02x%02x%02x" r-v g-v b-v)))
+
+(defun husl/conv-xyz-luv (x y z)
+  (if (= x y z 0.0)
+      '(0.0 0.0 0.0)
+    (let* (
+           (l (husl/y-to-l y))
+           (var-u (/ (* 4.0 x) (+ x (* 15.0 y) (* 3.0 z))))
+           (var-v (/ (* 9.0 x) (+ x (* 15.0 y) (* 3.0 z))))
+           (u (* 13.0 l (- var-u ref-u)))
+           (v (* 13.0 l (- var-v ref-v))))
+      `(,l ,u ,v))))
+
+
 ;; Public Functions ------------------------------------------------------------
 
 (defun husl/max-chroma-for-l-h (l h)
@@ -76,69 +130,18 @@
             husl/m
             :initial-value ())))
 
-(defun husl/conv-husl-lch (h s l)
-  (let ((c (if (or (> l 99.9999999) (< l 0.00000001))
-             0.0
-             (* s (/ (husl/max-chroma-for-l-h l h)) 100))))
-    `(,l ,c ,h)))
-
 (defun husl/length-of-ray-until-intersect (theta x y)
   (/ y (- (sin theta) (* x (cos theta)))))
-
-(defun husl/conv-rgb-hex (r g b)
-  (apply 'format "#%02x%02x%02x"
-         (mapcar (lambda (x)
-                   (* (max 0 (min x 1)) 255.0))
-                 `(,r ,g ,b))))
-
-(defun husl/conv-hex-rgb (hex)
-  (let* ((hex-c (replace-regexp-in-string "#" "" hex)))
-      (mapcar (lambda (nn)
-                (/ (float (string-to-number nn 16)) 255.0))
-              `(,(substring hex-c 0 2)
-                ,(substring hex-c 2 4)
-                ,(substring hex-c 4 6)))))
-
-(defun husl/conv-rgb-hex (r g b)
-  (let ((r-v (* (max 0 (min r 1)) 255.0))
-        (g-v (* (max 0 (min g 1)) 255.0))
-        (b-v (* (max 0 (min b 1)) 255.0)))
-    (format "#%02x%02x%02x" r-v g-v b-v)))
-
 
 (defun husl/y-to-l (y)
   (if (<= y epsilon)
       (* y kappa)
     (- (* 116.0 (expt y (/ 1.0 3.0))) 16.0)))
 
-(defun husl/conv-xyz-luv (x y z)
-  (if (= x y z 0.0)
-      '(0.0 0.0 0.0)
-    (let* (
-           (l (husl/y-to-l y))
-           (var-u (/ (* 4.0 x) (+ x (* 15.0 y) (* 3.0 z))))
-           (var-v (/ (* 9.0 x) (+ x (* 15.0 y) (* 3.0 z))))
-           (u (* 13.0 l (- var-u ref-u)))
-           (v (* 13.0 l (- var-v ref-v))))
-      `(,l ,u ,v))))
-
 (defun husl/l-to-y (l)
   (if (<= l 8)
       (/ l kappa)
     (expt (/ (+ l 16.0) 116.0) 3.0)))
-
-(defun husl/conv-luv-xyz (l u v)
-  (if (= l 0)
-      '(0 0 0)
-    (let* ((var-u (+ ref-u (/ u (* 13.0 l))))
-           (var-v (+ ref-v (/ u (* 13.0 l))))
-           (y (husl/l-to-y l))
-           (x (- 0.0 (/ (* 9.0 y var-u)
-                        (- (* (- var-u 4.0) var-v) (* var-u var-v)))))
-           (z (/ (- (* 9.0 y) (* 15.0 var-v y) (* var-v x))
-                 (* 3.0 var-v))))
-      `(,x ,y ,z))))
-
 
 (defun husl/distance-from-pole (point)
   (let ((x (nth 0 point))
