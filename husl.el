@@ -116,17 +116,17 @@ http://en.wikipedia.org/wiki/CIELUV"
                       ,(substring hex-c 2 4)
                       ,(substring hex-c 4 6)])))
 
+(defun husl/-lch-to-luv (l c h)
+  (let* ((h-rad (* (/ h 360.0) 2.0 float-pi))
+         (u (* c (cos h-rad)))
+         (v (* c (sin h-rad))))
+    `[,l ,u ,v]))
+
 (defun husl/conv-husl-lch (h s l)
   (let ((c (if (or (> l 99.9999999) (< l 0.00000001))
                0.0
              (* s (/ (husl/-max-chroma-for-l-h l h)) 100))))
     `(,l ,c ,h)))
-
-(defun husl/conv-lch-luv (l c h)
-  (let* ((h-rad (* (/ h 360.0) 2.0 float-pi))
-         (u (* c (cos h-rad)))
-         (v (* c (sin h-rad))))
-    `(,l ,u ,v)))
 
 (defun husl/conv-luv-lch (l u v)
   (let* ((c (sqrt (+ (expt u 2) (expt v 2))))
