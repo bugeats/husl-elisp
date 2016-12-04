@@ -100,6 +100,11 @@ http://en.wikipedia.org/wiki/CIELUV"
       (* husl/-kappa (/ y husl/-ref-y))
     (- (* 116 (expt (/ y husl/-ref-y) (/ 1.0 3.0))) 16)))
 
+(defun husl/-l-to-y (l)
+  (if (<= l 8)
+      (/ (* husl/-ref-y l) husl/-kappa)
+    (* husl/-ref-y (expt (/ (+ l 16.0) 116.0) 3.0))))
+
 
 ;; Conversion Functions --------------------------------------------------------
 
@@ -139,7 +144,7 @@ http://en.wikipedia.org/wiki/CIELUV"
       '(0 0 0)
     (let* ((var-u (+ husl/-ref-u (/ u (* 13.0 l))))
            (var-v (+ husl/-ref-v (/ u (* 13.0 l))))
-           (y (husl/l-to-y l))
+           (y (husl/-l-to-y l))
            (x (- 0.0 (/ (* 9.0 y var-u)
                         (- (* (- var-u 4.0) var-v) (* var-u var-v)))))
            (z (/ (- (* 9.0 y) (* 15.0 var-v y) (* var-v x))
@@ -175,11 +180,6 @@ http://en.wikipedia.org/wiki/CIELUV"
 
 (defun husl/length-of-ray-until-intersect (theta x y)
   (/ y (- (sin theta) (* x (cos theta)))))
-
-(defun husl/l-to-y (l)
-  (if (<= l 8)
-      (/ l husl/-kappa)
-    (expt (/ (+ l 16.0) 116.0) 3.0)))
 
 (defun husl/distance-from-pole (point)
   (let ((x (nth 0 point))

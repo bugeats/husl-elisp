@@ -42,6 +42,9 @@
 (ert-deftest test-y-to-l ()
   (should (equal (husl/-y-to-l 0.5) 76.06926101415557)))
 
+(ert-deftest test-l-to-y ()
+  (should (equal (husl/-l-to-y 76.06926101415557) 0.5000000000000001)))
+
 ;; (ert-deftest test-conv-lch-luv ()
 ;;   (should (eql (husl/conv-lch-luv
 ;;                 66.4684397846863
