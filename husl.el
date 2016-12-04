@@ -47,6 +47,28 @@
         (l 0))
     `[,h ,s ,l]))
 
+;; -----------------------------------------------------------------------------
+
+(defun husl/-get-bounds (l)
+  "For a given lightness, return a list of 6 lines in slope-intercept form that \
+represent the bounds in CIELUV, stepping over which will push a value out of the RGB gamut"
+  (let* ((sub1 (/ (expt (+ l 16.0) 3.0) 1560896.0))
+         (sub2 (if (> sub1 husl/-epsilon) (/ sub1 1) (/ l husl/-kappa))))
+    (reduce (lambda (ret-vect m-triple)
+              (vconcat ret-vect (reduce (lambda (nested k)
+                                          (let* ((m1 (aref m-triple 0))
+                                                 (m2 (aref m-triple 1))
+                                                 (m3 (aref m-triple 2))
+                                                 (top1 (* sub2 (- (* 284517.0 m1) (* 94839.0 m3))))
+                                                 (top2 (* (* 838422.0 (+ m3 769860.0) (+ m2 731718.0) m1) l (- sub2 769860.0) k l))
+                                                 (bottom (* (- (* 632260.0 m3) (* 126452.0 m2)) (+ sub2 126452.0) k))
+                                                 (x (/ top1 bottom))
+                                                 (y (/ top2 bottom)))
+                                            (vconcat ret-vect `[[,x ,y]])))
+                                        '(0 1)
+                                        :initial-value [])))
+            husl/-m
+            :initial-value [])))
 
 ;; Conversion Functions --------------------------------------------------------
 
@@ -138,27 +160,6 @@
                           (append prev `(,dist))))
                       (husl/-get-bounds l)
                       :initial-value ())))
-
-(defun husl/-get-bounds (l)
-  (let* ((sub1 (/ (expt (+ l 16.0) 3.0) 1560896.0))
-         (sub2 (if (> sub1 husl/-epsilon) (/ sub1 1) (/ l husl/-kappa))))
-    (reduce (lambda (ret-vect m-triple)
-              (vconcat ret-vect (reduce (lambda (nested k)
-                                          (let* ((m1 (aref m-triple 0))
-                                                 (m2 (aref m-triple 1))
-                                                 (m3 (aref m-triple 2))
-                                                 (top1 (* sub2 (- (* 284517.0 m1) (* 94839.0 m3))))
-                                                 (top2 (* (* 838422.0 (+ m3 769860.0) (+ m2 731718.0) m1) l (- sub2 769860.0) k l))
-                                                 (bottom (* (- (* 632260.0 m3) (* 126452.0 m2)) (+ sub2 126452.0) k))
-                                                 (x (/ top1 bottom))
-                                                 (y (/ top2 bottom)))
-                                            (vconcat ret-vect `[[,x ,y]])))
-                                        '(0 1)
-                                        :initial-value [])))
-            husl/-m
-            :initial-value [])))
-
-(husl/-get-bounds 1)
 
 (defun husl/length-of-ray-until-intersect (theta x y)
   (/ y (- (sin theta) (* x (cos theta)))))
