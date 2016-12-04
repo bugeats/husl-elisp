@@ -39,6 +39,9 @@
 (ert-deftest test-max-safe-chroma-for-l ()
   (should (equal (husl/-max-safe-chroma-for-l 0.5) 43.379884652926776)))
 
+(ert-deftest test-y-to-l ()
+  (should (equal (husl/-y-to-l 0.5) 76.06926101415557)))
+
 ;; (ert-deftest test-conv-lch-luv ()
 ;;   (should (eql (husl/conv-lch-luv
 ;;                 66.4684397846863

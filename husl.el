@@ -84,6 +84,22 @@ below this number will ensure that for any hue, the color is within the RGB gamu
                       (husl/-get-bounds l)
                       :initial-value ())))
 
+(defun husl/-max-chroma-for-l-h (l h)
+  (let ((h-rad (* (/ h 360) float-pi 2.0)))
+    (apply 'min (mapcar (lambda (line)
+                          (let ((x (nth 0 line))
+                                (y (nth 1 line)))
+                            (husl/length-of-ray-until-intersect h-rad x y)))
+                        (husl/-get-bounds l)))))
+
+(defun husl/-y-to-l (y)
+  "In these formulas, Yn refers to the reference white point. We are using illuminant D65, \
+so Yn (see refY in Maxima file) equals 1. The formula is simplified accordingly. \
+http://en.wikipedia.org/wiki/CIELUV"
+  (if (<= y husl/-epsilon)
+      (* husl/-kappa (/ y husl/-ref-y))
+    (- (* 116 (expt (/ y husl/-ref-y) (/ 1.0 3.0))) 16)))
+
 
 ;; Conversion Functions --------------------------------------------------------
 
@@ -98,7 +114,7 @@ below this number will ensure that for any hue, the color is within the RGB gamu
 (defun husl/conv-husl-lch (h s l)
   (let ((c (if (or (> l 99.9999999) (< l 0.00000001))
                0.0
-             (* s (/ (husl/max-chroma-for-l-h l h)) 100))))
+             (* s (/ (husl/-max-chroma-for-l-h l h)) 100))))
     `(,l ,c ,h)))
 
 (defun husl/conv-lch-luv (l c h)
@@ -147,7 +163,7 @@ below this number will ensure that for any hue, the color is within the RGB gamu
   (if (= x y z 0.0)
       '(0.0 0.0 0.0)
     (let* (
-           (l (husl/y-to-l y))
+           (l (husl/-y-to-l y))
            (var-u (/ (* 4.0 x) (+ x (* 15.0 y) (* 3.0 z))))
            (var-v (/ (* 9.0 x) (+ x (* 15.0 y) (* 3.0 z))))
            (u (* 13.0 l (- var-u husl/-ref-u)))
@@ -157,21 +173,8 @@ below this number will ensure that for any hue, the color is within the RGB gamu
 
 ;; -----------------------------------------------------------------------------
 
-(defun husl/max-chroma-for-l-h (l h)
-  (let ((h-rad (* (/ h 360) float-pi 2.0)))
-    (apply 'min (mapcar (lambda (line)
-                          (let ((x (nth 0 line))
-                                (y (nth 1 line)))
-                            (husl/length-of-ray-until-intersect h-rad x y)))
-                        (husl/-get-bounds l)))))
-
 (defun husl/length-of-ray-until-intersect (theta x y)
   (/ y (- (sin theta) (* x (cos theta)))))
-
-(defun husl/y-to-l (y)
-  (if (<= y husl/-epsilon)
-      (* y husl/-kappa)
-    (- (* 116.0 (expt y (/ 1.0 3.0))) 16.0)))
 
 (defun husl/l-to-y (l)
   (if (<= l 8)
