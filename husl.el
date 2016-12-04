@@ -1,8 +1,9 @@
 ;;; -*- lexical-binding: t -*-
 
-(defvar husl/m '((3.240969941904521 -1.537383177570093 -0.498610760293)
-                 (-0.96924363628087 1.87596750150772   0.041555057407175)
-                 (0.055630079696993 -0.20397695888897  1.056971514242878)))
+(defvar husl/-m [
+                 [3.240969941904521 -1.537383177570093 -0.498610760293]
+                 [-0.96924363628087 1.87596750150772   0.041555057407175]
+                 [0.055630079696993 -0.20397695888897  1.056971514242878]])
 
 ;; From Haxe Ref
 (defvar epsilon 0.0088564516)
@@ -115,7 +116,7 @@
                           (let ((x (nth 0 line))
                                 (y (nth 1 line)))
                             (husl/length-of-ray-until-intersect h-rad x y)))
-                        (husl/get-bounds l)))))
+                        (husl/-get-bounds l)))))
 
 (defun husl/max-safe-chroma-for-l (l)
   (apply 'min (reduce (lambda (prev line)
@@ -125,27 +126,29 @@
                                (y (* m1 (+ b1 x)))
                                (dist (husl/distance-from-pole `(,x ,y))))
                           (append prev `(,dist))))
-                      (husl/get-bounds l)
+                      (husl/-get-bounds l)
                       :initial-value ())))
 
-(defun husl/get-bounds (l)
+(defun husl/-get-bounds (l)
   (let* ((sub1 (/ (expt (+ l 16.0) 3.0) 1560896.0))
          (sub2 (if (> sub1 epsilon) (/ sub1 1) (/ l kappa))))
-    (reduce (lambda (list m-item)
-              (append list (reduce (lambda (nested k)
-                                     (let* ((m1 (nth 0 m-item))
-                                            (m2 (nth 1 m-item))
-                                            (m3 (nth 2 m-item))
-                                            (top1 (* sub2 (- (* 284517.0 m1) (* 94839.0 m3))))
-                                            (top2 (* (* 838422.0 (+ m3 769860.0) (+ m2 731718.0) m1) l (- sub2 769860.0) k l))
-                                            (bottom (* (- (* 632260.0 m3) (* 126452.0 m2)) (+ sub2 126452.0) k))
-                                            (x (/ top1 bottom))
-                                            (y (/ top2 bottom)))
-                                      (append list `((,x ,y)))))
-                                  '(0 1)
-                                  :initial-value ())))
-            husl/m
-            :initial-value ())))
+    (reduce (lambda (ret-vect m-triple)
+              (vconcat ret-vect (reduce (lambda (nested k)
+                                          (let* ((m1 (aref m-triple 0))
+                                                 (m2 (aref m-triple 1))
+                                                 (m3 (aref m-triple 2))
+                                                 (top1 (* sub2 (- (* 284517.0 m1) (* 94839.0 m3))))
+                                                 (top2 (* (* 838422.0 (+ m3 769860.0) (+ m2 731718.0) m1) l (- sub2 769860.0) k l))
+                                                 (bottom (* (- (* 632260.0 m3) (* 126452.0 m2)) (+ sub2 126452.0) k))
+                                                 (x (/ top1 bottom))
+                                                 (y (/ top2 bottom)))
+                                            (vconcat ret-vect `[[,x ,y]])))
+                                        '(0 1)
+                                        :initial-value [])))
+            husl/-m
+            :initial-value [])))
+
+(husl/-get-bounds 1)
 
 (defun husl/length-of-ray-until-intersect (theta x y)
   (/ y (- (sin theta) (* x (cos theta)))))
