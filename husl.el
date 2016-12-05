@@ -87,8 +87,8 @@ below this number will ensure that for any hue, the color is within the RGB gamu
 (defun husl/-max-chroma-for-l-h (l h)
   (let ((h-rad (* (/ h 360) float-pi 2.0)))
     (apply 'min (mapcar (lambda (line)
-                          (let ((x (nth 0 line))
-                                (y (nth 1 line)))
+                          (let ((x (aref line 0))
+                                (y (aref line 1)))
                             (husl/length-of-ray-until-intersect h-rad x y)))
                         (husl/-get-bounds l)))))
 
@@ -116,17 +116,27 @@ http://en.wikipedia.org/wiki/CIELUV"
                       ,(substring hex-c 2 4)
                       ,(substring hex-c 4 6)])))
 
+(defun husl/-husl-to-lch (h s l)
+  (let ((c (if (or (> l 99.9999999) (< l 0.00000001))
+               0.0
+             (* s (/ (husl/-max-chroma-for-l-h l h)) 100.0))))
+    (vector l c h)))
+
+(defun husl/-lch-to-husl (l c h)
+  (cond ((> l 99.9999999)
+         (vector h 0.0 100.0))
+        ((< l 0.00000001)
+         (vector h 0.0 0.0))
+        (t
+          (let* ((max (husl/-max-chroma-for-l-h l h))
+                 (s (* (/ c max) 100.0)))
+            (vector h s l)))))
+
 (defun husl/-lch-to-luv (l c h)
   (let* ((h-rad (* (/ h 360.0) 2.0 float-pi))
          (u (* c (cos h-rad)))
          (v (* c (sin h-rad))))
     (vector l u v)))
-
-(defun husl/-husl-to-lch (h s l)
-  (let ((c (if (or (> l 99.9999999) (< l 0.00000001))
-               0.0
-             (* s (/ (husl/-max-chroma-for-l-h l h)) 100))))
-    (vector l c h)))
 
 (defun husl/-luv-to-lch (l u v)
   (let* ((c (sqrt (+ (expt u 2) (expt v 2))))

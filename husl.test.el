@@ -46,6 +46,17 @@
   (should (equal (husl/-l-to-y 76.06926101415557) 0.5000000000000001)))
 
 ;; ;; TODO this has rounding errors
+;; (ert-deftest test-lch-to-husl ()
+;;   (should (equal (husl/-lch-to-husl
+;;                   66.4684397846863
+;;                   46.88298913974675
+;;                   229.3363102843981)
+;;                  [
+;;                   229.3363102843981
+;;                   66.27255533641578
+;;                   66.4684397846863])))
+
+;; ;; TODO this has rounding errors
 ;; (ert-deftest test-lch-to-luv ()
 ;;   (should (eql (husl/-lch-to-luv
 ;;                 66.4684397846863
