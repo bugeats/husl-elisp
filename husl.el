@@ -121,7 +121,6 @@ http://en.wikipedia.org/wiki/CIELUV"
       (/ (* husl/-ref-y l) husl/-kappa)
     (* husl/-ref-y (expt (/ (+ l 16.0) 116.0) 3.0))))
 
-
 ;; Conversion Functions --------------------------------------------------------
 
 (defun husl/-hex-to-rgb (hex)
@@ -181,17 +180,20 @@ http://en.wikipedia.org/wiki/CIELUV"
                    (* (max 0 (min x 1)) 255.0))
                  (vector r g b))))
 
-(defun husl/conv-xyz-luv (x y z)
-  (if (= x y z 0.0)
-      '(0.0 0.0 0.0)
-    (let* (
-           (l (husl/-y-to-l y))
-           (var-u (/ (* 4.0 x) (+ x (* 15.0 y) (* 3.0 z))))
-           (var-v (/ (* 9.0 x) (+ x (* 15.0 y) (* 3.0 z))))
-           (u (* 13.0 l (- var-u husl/-ref-u)))
-           (v (* 13.0 l (- var-v husl/-ref-v))))
-      (vector l u v))))
-
+(defun husl/-xyz-to-luv (x y z)
+  (let* ((divider (+ x (* 15 y) (* 3 z)))
+         (var-u (if (= divider 0)
+                    0.0e+NaN
+                  (/ (* 4 x) divider)))
+         (var-v (if (= divider 0)
+                    0.0e+NaN
+                  (/ (* 9 y) divider)))
+         (l (husl/-y-to-l y)))
+    (if (= l 0)
+        (vector 0 0 0)
+      (vector l
+              (* 13 l (- var-u husl/-ref-u))
+              (* 13 l (- var-v husl/-ref-v))))))
 
 ;; -----------------------------------------------------------------------------
 

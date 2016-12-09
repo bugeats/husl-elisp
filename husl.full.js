@@ -252,26 +252,35 @@ husl_Husl.yToL = function(Y) {
 husl_Husl.lToY = function(L) {
 	if(L <= 8) return husl_Husl.refY * L / husl_Husl.kappa; else return husl_Husl.refY * Math.pow((L + 16) / 116,3);
 };
+
 husl_Husl.xyzToLuv = function(tuple) {
-	var X = tuple[0];
-	var Y = tuple[1];
-	var Z = tuple[2];
-	var divider = X + 15 * Y + 3 * Z;
-	var varU = 4 * X;
-	var varV = 9 * Y;
-	if(divider != 0) {
-		varU /= divider;
-		varV /= divider;
-	} else {
-		varU = NaN;
-		varV = NaN;
-	}
-	var L = husl_Husl.yToL(Y);
-	if(L == 0) return [0,0,0];
-	var U = 13 * L * (varU - husl_Husl.refU);
-	var V = 13 * L * (varV - husl_Husl.refV);
-	return [L,U,V];
+    var X = tuple[0];
+    var Y = tuple[1];
+    var Z = tuple[2];
+    var divider = X + 15 * Y + 3 * Z;
+    var varU = 4 * X;
+    var varV = 9 * Y;
+
+    if (divider != 0) {
+        varU /= divider;
+        varV /= divider;
+    } else {
+        varU = NaN;
+        varV = NaN;
+    }
+    var L = husl_Husl.yToL(Y);
+    if (L == 0) return [0,0,0];
+    var U = 13 * L * (varU - husl_Husl.refU);
+    var V = 13 * L * (varV - husl_Husl.refV);
+
+    console.log('> divider', divider);
+    console.log('> L', L);
+    console.log('> varU', varU);
+    console.log('> varV', varV);
+
+    return [L,U,V];
 };
+
 husl_Husl.luvToXyz = function(tuple) {
 	var L = tuple[0];
 	var U = tuple[1];
