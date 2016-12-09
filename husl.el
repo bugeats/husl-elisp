@@ -62,18 +62,17 @@ represent the bounds in CIELUV, stepping over which will push a value out of the
                                         (m2 (aref m-triple 1))
                                         (m3 (aref m-triple 2))
                                         (top1 (* sub2 (- (* 284517.0 m1) (* 94839.0 m3))))
-                                        (top2 (* (+ (* 838422.0 m3) (* 769860.0 m2) (* 731718.0 m1))
-                                                 l (- sub2 769860.0) k l))
-                                        (bottom (* (- (* 632260.0 m3) (* 126452.0 m2)) (+ sub2 126452.0) k))
+                                        (top2 (- (* (+ (* 838422.0 m3) (* 769860.0 m2) (* 731718.0 m1)) l sub2)
+                                                 (* 769860 k l)))
+                                        (bottom (+ (* (- (* 632260.0 m3) (* 126452.0 m2)) sub2)
+                                                   (* 126452.0 k)))
                                         (x (/ top1 bottom))
                                         (y (/ top2 bottom)))
                                    (vconcat nested `[[,x ,y]])))
-                               [0.0 1.0]
+                               [0 1]
                                :initial-value [])))
             husl/-m
             :initial-value [])))
-
-;; (husl/-get-bounds 66.4684397846863)
 
 (defun husl/-max-safe-chroma-for-l (l)
   "For given lightness, returns the maximum chroma. Keeping the chroma value \
@@ -108,8 +107,6 @@ below this number will ensure that for any hue, the color is within the RGB gamu
                                 (append prev `(,length)))))
                         (husl/-get-bounds l)
                         :initial-value `(,cl-most-positive-float)))))
-
-;; (husl/-max-chroma-for-l-h 66.4684397846863 229.3363102843981)
 
 (defun husl/-y-to-l (y)
   "In these formulas, Yn refers to the reference white point. We are using illuminant D65, \
@@ -150,8 +147,6 @@ http://en.wikipedia.org/wiki/CIELUV"
           (let* ((max (husl/-max-chroma-for-l-h l h))
                  (s (* (/ c max) 100.0)))
             (vector h s l)))))
-
-;; (husl/-lch-to-husl 66.4684397846863 46.88298913974675 229.3363102843981)
 
 (defun husl/-lch-to-luv (l c h)
   (let* ((h-rad (* (/ h 360.0) 2.0 float-pi))

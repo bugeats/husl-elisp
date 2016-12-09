@@ -51,6 +51,7 @@
                  [50 0.0 100.0]))
   (should (equal (husl/-lch-to-husl 0 50 50)
                  [50 0.0 0.0])))
+  ;; TODO this has rounding errors
   ;; (should (equal (husl/-lch-to-husl
   ;;                 66.4684397846863
   ;;                 46.88298913974675
