@@ -1,6 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 
 (require 'cl)
+(cl-float-limits)
 
 ;; Constants -------------------------------------------------------------------
 
@@ -72,6 +73,8 @@ represent the bounds in CIELUV, stepping over which will push a value out of the
             husl/-m
             :initial-value [])))
 
+;; (husl/-get-bounds 66.4684397846863)
+
 (defun husl/-max-safe-chroma-for-l (l)
   "For given lightness, returns the maximum chroma. Keeping the chroma value \
 below this number will ensure that for any hue, the color is within the RGB gamut."
@@ -87,7 +90,12 @@ below this number will ensure that for any hue, the color is within the RGB gamu
 
 (defun husl/-length-of-ray-until-intersect (theta x y)
   (let ((length (/ y (- (sin theta) (* x (cos theta))))))
-    (if (< length 0) nil length)))
+    (cond ((< length 0)
+           nil)
+          ((isnan length)
+           nil)
+          (t
+           length))))
 
 (defun husl/-max-chroma-for-l-h (l h)
   (let ((h-rad (* (/ h 360) float-pi 2.0)))
@@ -95,12 +103,13 @@ below this number will ensure that for any hue, the color is within the RGB gamu
                           (let* ((x (aref line 0))
                                  (y (aref line 1))
                                  (length (husl/-length-of-ray-until-intersect h-rad x y)))
-                            (message line)
                             (if (eq length nil)
                                 prev
                                 (append prev `(,length)))))
                         (husl/-get-bounds l)
-                        :initial-value '(1.7976931348623157e+308)))))
+                        :initial-value `(,cl-most-positive-float)))))
+
+;; (husl/-max-chroma-for-l-h 66.4684397846863 229.3363102843981)
 
 (defun husl/-y-to-l (y)
   "In these formulas, Yn refers to the reference white point. We are using illuminant D65, \
@@ -141,6 +150,8 @@ http://en.wikipedia.org/wiki/CIELUV"
           (let* ((max (husl/-max-chroma-for-l-h l h))
                  (s (* (/ c max) 100.0)))
             (vector h s l)))))
+
+;; (husl/-lch-to-husl 66.4684397846863 46.88298913974675 229.3363102843981)
 
 (defun husl/-lch-to-luv (l c h)
   (let* ((h-rad (* (/ h 360.0) 2.0 float-pi))
