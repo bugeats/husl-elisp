@@ -57,16 +57,16 @@ represent the bounds in CIELUV, stepping over which will push a value out of the
     (reduce (lambda (ret-vect m-triple)
               (vconcat ret-vect
                        (reduce (lambda (nested k)
-                                  (let* ((m1 (aref m-triple 0))
-                                         (m2 (aref m-triple 1))
-                                         (m3 (aref m-triple 2))
-                                         (top1 (* sub2 (- (* 284517.0 m1) (* 94839.0 m3))))
-                                         (top2 (* (+ (* 838422.0 m3) (* 769860.0 m2) (* 731718.0 m1))
-                                                  l (- sub2 769860.0) k l))
-                                         (bottom (* (- (* 632260.0 m3) (* 126452.0 m2)) (+ sub2 126452.0) k))
-                                         (x (/ top1 bottom))
-                                         (y (/ top2 bottom)))
-                                    (vconcat nested `[[,x ,y]])))
+                                 (let* ((m1 (aref m-triple 0))
+                                        (m2 (aref m-triple 1))
+                                        (m3 (aref m-triple 2))
+                                        (top1 (* sub2 (- (* 284517.0 m1) (* 94839.0 m3))))
+                                        (top2 (* (+ (* 838422.0 m3) (* 769860.0 m2) (* 731718.0 m1))
+                                                 l (- sub2 769860.0) k l))
+                                        (bottom (* (- (* 632260.0 m3) (* 126452.0 m2)) (+ sub2 126452.0) k))
+                                        (x (/ top1 bottom))
+                                        (y (/ top2 bottom)))
+                                   (vconcat nested `[[,x ,y]])))
                                [0.0 1.0]
                                :initial-value [])))
             husl/-m
@@ -86,7 +86,8 @@ below this number will ensure that for any hue, the color is within the RGB gamu
                       :initial-value ())))
 
 (defun husl/-length-of-ray-until-intersect (theta x y)
-  (/ y (- (sin theta) (* x (cos theta)))))
+  (let ((length (/ y (- (sin theta) (* x (cos theta))))))
+    (if (< length 0) nil length)))
 
 (defun husl/-max-chroma-for-l-h (l h)
   (let ((h-rad (* (/ h 360) float-pi 2.0)))
@@ -94,7 +95,10 @@ below this number will ensure that for any hue, the color is within the RGB gamu
                           (let* ((x (aref line 0))
                                  (y (aref line 1))
                                  (length (husl/-length-of-ray-until-intersect h-rad x y)))
-                            (append prev `(,length))))
+                            (message line)
+                            (if (eq length nil)
+                                prev
+                                (append prev `(,length)))))
                         (husl/-get-bounds l)
                         :initial-value '(1.7976931348623157e+308)))))
 
