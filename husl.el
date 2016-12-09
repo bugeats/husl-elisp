@@ -197,6 +197,27 @@ http://en.wikipedia.org/wiki/CIELUV"
 
 ;; -----------------------------------------------------------------------------
 
+(defun husl/-from-linear (c)
+  (if (<= c 0.0031308)
+      (* 12.92 c)
+    (- (* 1.055 (expt c (/ 1 2.4))) 0.055)))
+
+(defun husl/-dot-product (v1 v2)
+  (let ((res 0))
+    (dotimes (i (length v1))
+      (setq res (+ res (* (elt v1 i) (elt v2 i)))))
+    res))
+
+(defun husl/-xyz-to-rgb (x y z)
+  "XYZ coordinates are ranging in [0:1] and RGB coordinates in [0:1] range.\n
+Return an array containing the resulting color's red, green and blue."
+  (let ((tuple `[,x ,y ,z]))
+    (vector (husl/-from-linear (husl/-dot-product (elt husl/-m 0) tuple))
+            (husl/-from-linear (husl/-dot-product (elt husl/-m 1) tuple))
+            (husl/-from-linear (husl/-dot-product (elt husl/-m 2) tuple)))))
+
+;; -----------------------------------------------------------------------------
+
 (defun husl/distance-from-pole (point)
   (let ((x (nth 0 point))
         (y (nth 1 point)))

@@ -75,6 +75,15 @@
   (should (equal (husl/-xyz-to-luv 21.24673129498138 7.666298341556465e-15 0)
                  [6.924938897492157e-12 3.422873334643934e-10 -4.216013554252415e-11])))
 
+;; ;; TODO this has rounding errors
+;; (ert-deftest test-conv-xyz-luv ()
+;;   (should (equal (husl/-xyz-to-rgb 0.3075138663461921
+;;                                    0.3593265991736845
+;;                                    0.6244394063757823)
+;;                  [0.4
+;;                   0.6666666666666666
+;;                   0.8])))
+
 ;; From husl ref
 ;;
 ;; #66aacc
