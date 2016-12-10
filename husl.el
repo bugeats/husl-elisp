@@ -147,6 +147,16 @@ http://en.wikipedia.org/wiki/CIELUV"
                  (s (* (/ c max) 100.0)))
             (vector h s l)))))
 
+(defun husl/-lch-to-huslp (l c h)
+  (cond ((> l 99.9999999)
+         (vector h 0.0 100.0))
+        ((< l 0.00000001)
+         (vector h 0.0 0.0))
+        (t
+         (let* ((max (husl/-max-safe-chroma-for-l l))
+                (s (* (/ c max) 100.0)))
+           (vector h s l)))))
+
 (defun husl/-lch-to-luv (l c h)
   (let* ((h-rad (* (/ h 360.0) 2.0 float-pi))
          (u (* c (cos h-rad)))
