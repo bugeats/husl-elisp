@@ -216,6 +216,14 @@ Return an array containing the resulting color's red, green and blue."
             (husl/-from-linear (husl/-dot-product (elt husl/-m 1) tuple))
             (husl/-from-linear (husl/-dot-product (elt husl/-m 2) tuple)))))
 
+(defun husl/-rgb-to-xyz (r g b)
+  (let ((rgbl `[,(husl/-from-linear r)
+                ,(husl/-from-linear g)
+                ,(husl/-from-linear b)]))
+    (vector (husl/-dot-product (elt husl/-minv 0) rgbl)
+            (husl/-dot-product (elt husl/-minv 1) rgbl)
+            (husl/-dot-product (elt husl/-minv 2) rgbl))))
+
 ;; -----------------------------------------------------------------------------
 
 (defun husl/distance-from-pole (point)
