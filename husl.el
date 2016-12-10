@@ -25,28 +25,20 @@
 ;; Required Public Functions ---------------------------------------------------
 
 (defun husl/husl-to-rgb (h s l)
-  (let ((r 0)
-        (g 0)
-        (b 0))
-   `[,r ,g ,b]))
+  (husl/-apply-v 'husl/-lch-to-rgb
+                 (husl/-husl-to-lch h s l)))
 
 (defun husl/rgb-to-husl (r g b)
-  (let ((h 0)
-        (s 0)
-        (l 0))
-    `[,h ,s ,l]))
+  (husl/-apply-v 'husl/-lch-to-husl
+                 (husl/-rgb-to-lch r g b)))
 
-(defun husl/huslp-to-rgb (r g b)
-  (let ((r 0)
-        (g 0)
-        (b 0))
-    `[,r ,g ,b]))
+(defun husl/huslp-to-rgb (h s l)
+  (husl/-apply-v 'husl/-lch-to-rgb
+                 (husl/-huslp-to-lch h s l)))
 
 (defun husl/rgb-to-huslp (r g b)
-  (let ((h 0)
-        (s 0)
-        (l 0))
-    `[,h ,s ,l]))
+  (husl/-apply-v 'husl/-lch-to-huslp
+                 (husl/-rgb-to-lch h s l)))
 
 ;; -----------------------------------------------------------------------------
 
@@ -137,6 +129,12 @@ http://en.wikipedia.org/wiki/CIELUV"
              (* s (/ (husl/-max-chroma-for-l-h l h)) 100.0))))
     (vector l c h)))
 
+(defun husl/-huslp-to-lch (h s l)
+  (let ((c (if (or (> l 99.9999999) (< l 0.00000001))
+               0.0
+             (* s (/ (husl/-max-safe-chroma-for-l l)) 100.0))))
+    (vector l c h)))
+
 (defun husl/-lch-to-husl (l c h)
   (cond ((> l 99.9999999)
          (vector h 0.0 100.0))
@@ -162,6 +160,23 @@ http://en.wikipedia.org/wiki/CIELUV"
          (u (* c (cos h-rad)))
          (v (* c (sin h-rad))))
     (vector l u v)))
+
+;; ----------
+
+(defun husl/-apply-v (f v)
+  (apply f (append v ())))
+
+(defun husl/-lch-to-rgb (l c h)
+  (husl/-apply-v 'husl/-xyz-to-rgb
+                 (husl/-apply-v 'husl/-luv-to-xyz
+                                (husl/-lch-to-luv l c h))))
+
+(defun husl/-rgb-to-lch (r g b)
+  (husl/-apply-v 'husl/-luv-to-lch
+                 (husl/-apply-v 'husl/-xyz-to-luv
+                                (husl/-rgb-to-xyz r g b))))
+
+;; ----------
 
 (defun husl/-luv-to-lch (l u v)
   (let* ((c (sqrt (+ (expt u 2) (expt v 2))))
